@@ -1,2 +1,2 @@
 # catcher
-IoT platform, the catcher of things
+Edge IoT platform, the catcher of things
