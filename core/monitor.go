@@ -5,6 +5,13 @@ type Transformation struct {
 	new interface{}
 }
 
+/*
+core do not control thing directly, but monitor thing through thing proxy,
+it 's a decoupling strategy for core and manager, that control the lifecycle of thing
+*/
+type ThingProxy struct {
+}
+
 type Monitor struct {
 }
 
