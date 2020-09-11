@@ -21,33 +21,6 @@ type Event struct {
 	EventData interface{}
 }
 
-type EventBus struct {
-	bus map[*Event][]*Service
-}
-
-func (eventBus *EventBus) Listen(event *Event, service *Service) {
-	if services, ok := eventBus.bus[event]; !ok {
-		eventBus.bus[event] = []*Service{service}
-	} else {
-		flag := true
-		for _, item := range services {
-			if item.id == service.id {
-				flag = false
-				break
-			}
-		}
-		if flag {
-			services = append(services, service)
-		}
-	}
-}
-
-func (eventBus *EventBus) Fire(event *Event) {
-	for _, service := range eventBus.bus[event] {
-		go service.action(event.EventData)
-	}
-}
-
 type Thing struct {
 	state      string
 	properties map[string]interface{}
