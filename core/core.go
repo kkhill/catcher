@@ -1,9 +1,14 @@
 package core
 
+import (
+	"reflect"
+)
+
 type Core struct {
-	serviceRegistry *ServiceRegistry
-	eventBus        *EventBus
-	monitor         *Monitor
+	ServiceRegistry *ServiceRegistry
+	EventBus        *EventBus
+	Monitor         *Monitor
+	ThingRegistry   map[string]reflect.Type
 }
 
 type Service struct {
@@ -21,12 +26,11 @@ type Event struct {
 	EventData interface{}
 }
 
-type Thing struct {
-	state      string
-	properties map[string]interface{}
-	service    []*Service
-}
+var Root *Core
 
-type Monitor struct {
-	things []*Thing
+func init() {
+	Root = &Core{
+		EventBus: &EventBus{},
+		Monitor:  NewMonitor(),
+	}
 }
