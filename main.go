@@ -1,7 +1,6 @@
 package main
 
 import (
-	"catcher/common"
 	"catcher/core"
 	_ "catcher/driver"
 	"fmt"
@@ -25,11 +24,16 @@ func Start() {
 
 	log.Println("Start loading drivers...")
 	for name, config := range drivers {
-		if driver, ok := common.DriverRegistry[name]; ok {
+		if driver, ok := core.DriverRegistry[name]; ok {
 			driver.MethodByName("Setup").Call([]reflect.Value{reflect.ValueOf(config)})
 			log.Printf("set up driver: %v \n", name)
 		}
 	}
+
+	log.Println("Start loading automations...")
+
+	// test event bus
+	//core.Root.EventBus.Listen(core.ServiceCalled, )
 
 	// test monitor
 	things := core.Root.Monitor.GetThingsId()

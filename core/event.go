@@ -2,21 +2,30 @@ package core
 
 import (
 	"container/list"
+	"log"
 	"time"
 )
 
-type EventType struct {
-	name      string
-	source    string
-	timestamp time.Time
-	data      map[string]interface{}
+type EventType int32
+
+const (
+	StateChanged    EventType = 0
+	PropertyChanged EventType = 1
+	ServiceCalled   EventType = 2
+)
+
+type Event struct {
+	EventType EventType
+	Source    string
+	Timestamp time.Time
+	Data      interface{}
 }
 
 type EventBus struct {
-	bus map[*EventType]*list.List // EventType -> [ EventConsumer ]
+	bus map[EventType]*list.List // EventType -> [ EventConsumer ]
 }
 
-func (eventBus *EventBus) Listen(event *EventType, consumer *EventConsumer) {
+func (eventBus *EventBus) Listen(event EventType, consumer *EventConsumer) {
 
 	if consumers, ok := eventBus.bus[event]; !ok {
 		consumers = list.New()
@@ -27,21 +36,23 @@ func (eventBus *EventBus) Listen(event *EventType, consumer *EventConsumer) {
 	}
 }
 
-func (eventBus *EventBus) Fire(event *EventType) {
+func (eventBus *EventBus) Fire(event *Event) {
 
-	if consumers, ok := eventBus.bus[event]; ok {
+	log.Printf("fire event: %v \n", event.EventType)
+	if consumers, ok := eventBus.bus[event.EventType]; ok {
 		for e := consumers.Front(); e != nil; e = e.Next() {
 			consumer := e.Value.(EventConsumer)
-			err := consumer.execute(event)
+			err := consumer.Execute(event)
 			if err != nil {
-
+				log.Printf("failed to execute consumer function \n")
 			}
+			log.Printf("execute consumer function %v \n", event.EventType)
 		}
 	}
 }
 
 type EventConsumer interface {
-	execute(e *EventType) (err error)
+	Execute(e *Event) error
 }
 
 type EventProducer struct {

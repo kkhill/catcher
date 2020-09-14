@@ -1,7 +1,6 @@
 package driver
 
 import (
-	"catcher/common"
 	"catcher/core"
 	"fmt"
 )
@@ -14,32 +13,45 @@ func (demo *DriverDemo) Setup(config interface{}) {
 	//data := config.(string)
 	fmt.Println("Yeah! i have been setup")
 	// construct a thing
-	var thing common.Thing
-	thing = &ThingDemo{}
+	var thing core.Thing
+	thing = &ThingDemo{
+		Brightness:  50,
+		Temperature: 24.7,
+	}
 	// register services for thing
 
 	core.Root.Monitor.RegistryThing(thing)
 }
 
 type ThingDemo struct {
-	brightness int
-	services   map[string]func(interface{}) (interface{}, error)
+	// define properties
+	Brightness  int32
+	Temperature float32
 }
 
 func (demo *ThingDemo) GetName() string {
+	// return a lovely name. name will be the part of id which is unique
 	return "lovely"
 }
 
 func (demo *ThingDemo) GetStates() []string {
+
+	// register all states of thing, and the first one will be init state
 	return []string{"off", "on"}
 }
 
-func (demo *ThingDemo) GetProperties() []string {
-	return []string{"brightness", "power"}
+func (demo *ThingDemo) GetProperties() map[string]interface{} {
+
+	// register all properties which the thing has
+	m := make(map[string]interface{})
+	m["brightness"] = demo.Brightness
+	m["temperature"] = demo.Temperature
+	return m
 }
 
 func (demo *ThingDemo) GetServices() map[string]func(map[string]interface{}) (interface{}, error) {
 
+	// register all services which the thing supports
 	m := make(map[string]func(map[string]interface{}) (interface{}, error))
 	m["Open"] = demo.Open
 	m["Close"] = demo.Close
@@ -60,7 +72,7 @@ func (demo *ThingDemo) Close(map[string]interface{}) (interface{}, error) {
 func init() {
 
 	// register driver of Things
-	var driver common.Driver
+	var driver core.Driver
 	driver = &DriverDemo{}
-	common.RegisterDriver(driver)
+	core.RegisterDriver(driver)
 }
