@@ -6,3 +6,7 @@ func init() {
 
 	//fmt.Println("hello, I'm a driver too")
 }
+
+func Setup() {
+
+}

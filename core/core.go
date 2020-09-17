@@ -1,17 +1,26 @@
 package core
 
+import (
+	"reflect"
+)
+
+var Root *Core
+
 type Core struct {
+	DriverRegistry  DriverRegistry // driver can not be dependent any other
+	PluginRegistry  PluginRegistry // but plugin can
 	ServiceRegistry *ServiceRegistry
 	EventBus        *EventBus
 	Monitor         *Monitor
 }
 
-var Root *Core
-
 func init() {
+
 	bus := &EventBus{}
 	Root = &Core{
-		EventBus: bus,
-		Monitor:  NewMonitor(bus),
+		DriverRegistry: make(map[string]reflect.Value),
+		PluginRegistry: make(map[string]reflect.Value),
+		EventBus:       bus,
+		Monitor:        NewMonitor(bus),
 	}
 }

@@ -7,6 +7,14 @@ import (
 
 type DriverDemo struct{}
 
+func init() {
+
+	// register driver of Things
+	var driver core.Driver
+	driver = &DriverDemo{}
+	core.Root.DriverRegistry.RegisterDriver(driver)
+}
+
 // add thing objects to runtime
 func (demo *DriverDemo) Setup(config interface{}) {
 
@@ -67,12 +75,4 @@ func (demo *ThingDemo) Open(map[string]interface{}) (interface{}, error) {
 func (demo *ThingDemo) Close(map[string]interface{}) (interface{}, error) {
 	fmt.Println("close demo thing")
 	return nil, nil
-}
-
-func init() {
-
-	// register driver of Things
-	var driver core.Driver
-	driver = &DriverDemo{}
-	core.RegisterDriver(driver)
 }

@@ -7,11 +7,11 @@ import (
 	"gopkg.in/yaml.v2"
 	"io/ioutil"
 	"log"
-	"reflect"
 )
 
 func Start() {
 
+	// initialize drivers
 	data, err := ioutil.ReadFile("config/driver.yaml")
 	if err != nil {
 		log.Fatalln("Can not open driver.yaml")
@@ -23,14 +23,20 @@ func Start() {
 	}
 
 	log.Println("Start loading drivers...")
-	for name, config := range drivers {
-		if driver, ok := core.DriverRegistry[name]; ok {
-			driver.MethodByName("Setup").Call([]reflect.Value{reflect.ValueOf(config)})
-			log.Printf("set up driver: %v \n", name)
-		}
-	}
+	core.Root.DriverRegistry.LoadDrivers(drivers)
 
-	log.Println("Start loading automations...")
+	// initialize plugins
+	data, err = ioutil.ReadFile("config/driver.yaml")
+	if err != nil {
+		log.Fatalln("Can not open driver.yaml")
+	}
+	plugins := make(map[string]interface{})
+	err = yaml.Unmarshal(data, plugins)
+	if err != nil {
+		log.Fatalln("Syntax err in driver.yaml")
+	}
+	log.Println("Start loading plugins...")
+	core.Root.PluginRegistry.LoadPlugins(plugins)
 
 	// test event bus
 	//core.Root.EventBus.Listen(core.ServiceCalled, )
