@@ -1,35 +1,8 @@
-package driver
+package demo
 
 import (
-	"catcher/core"
 	"fmt"
 )
-
-type DriverDemo struct{}
-
-func init() {
-
-	// register driver of Things
-	var driver core.Driver
-	driver = &DriverDemo{}
-	core.Root.DriverRegistry.RegisterDriver(driver)
-}
-
-// add thing objects to runtime
-func (demo *DriverDemo) Setup(config interface{}) {
-
-	//data := config.(string)
-	fmt.Println("Yeah! i have been setup")
-	// construct a thing
-	var thing core.Thing
-	thing = &ThingDemo{
-		Brightness:  50,
-		Temperature: 24.7,
-	}
-	// register services for thing
-
-	core.Root.Monitor.RegistryThing(thing)
-}
 
 type ThingDemo struct {
 	// define properties

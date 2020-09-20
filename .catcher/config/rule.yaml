@@ -1,0 +1,21 @@
+# 配置自动化规则
+
+- name: lovely_automation
+  event:
+    - type: serviceCalled
+      thing: [lovely] # and system
+      data:
+        a: hello
+        b: world
+  condition:
+    - type: property # state, context
+      name: brightness
+      thing: [lovely]
+      threshold: 50
+      operation: ">="
+
+  action:
+    # TODO not only service of devices, but also logging and script etc.
+    - type: service
+      thing: [lovely] # and system
+      name: open
