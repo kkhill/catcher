@@ -1,6 +1,7 @@
 package core
 
 import (
+	"container/list"
 	"reflect"
 )
 
@@ -16,7 +17,9 @@ type Core struct {
 
 func init() {
 
-	bus := &EventBus{}
+	bus := &EventBus{
+		bus: make(map[EventType]*list.List),
+	}
 	Root = &Core{
 		//DriverRegistry: make(map[string]reflect.Value),
 		PluginRegistry: make(map[string]reflect.Value),

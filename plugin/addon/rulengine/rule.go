@@ -1,15 +1,10 @@
 package rulengine
 
 import (
+	"catcher/core"
 	"errors"
 	"log"
 )
-
-type Event struct {
-	Type   string
-	Things []string
-	Data   map[string]interface{}
-}
 
 type Condition struct {
 	Type      string
@@ -25,64 +20,59 @@ type Action struct {
 	Name   string
 }
 
+// a rule is a bunch of conditions and actions
 type Rule struct {
-	Name      string
-	Id        string
-	Event     []*Event
-	Condition []*Condition
-	Action    []*Action
+	Name       string
+	Id         string
+	Conditions []*Condition
+	Actions    []*Action
 }
 
-func ParseRules(data interface{}) []*Rule {
+type Rules map[core.EventType][]*Rule
+
+func ParseRules(data []map[string]interface{}) map[core.EventType][]*Rule {
 
 	rules := make([]*Rule, 0)
-	rulesData, ok := data.([]map[string]interface{})
-	if !ok {
-		log.Println("invalid rules data")
-		return rules
-	}
-
-	for _, ruleData := range rulesData {
+	for _, ruleData := range data {
 		// TODO generate a unique id
 		id := "some id"
 		name, ok := ruleData["name"].(string)
 		if !ok {
 			ruleData["name"] = id
 		}
-		eventData, ok := ruleData["event"].([]interface{})
+		eventData, ok := ruleData["event"].(map[interface{}]interface{})
 		if !ok {
 			log.Printf("fail to load rule: %v, wrong 'if' expression \n", name)
 			continue
 		}
-		conditionData := ruleData["condition"].([]interface{})
-		actionData, ok := ruleData["action"].([]interface{})
+		conditionsData := ruleData["conditions"].([]interface{})
+		actionsData, ok := ruleData["actions"].([]interface{})
 		if !ok {
 			log.Printf("fail to load rule: %v, wrong 'action' expression \n", name)
 			continue
 		}
 
-		events, err := parseEvents(eventData)
-		if err != nil || events == nil {
+		event, err := parseEvent(eventData)
+		if err != nil || event == nil {
 			log.Printf("%v: %v \n", name, err)
 			continue
 		}
 		// allowed to miss condition, but not event and action
-		conditions, err := parseConditions(conditionData)
+		conditions, err := parseConditions(conditionsData)
 		if err != nil {
 			log.Printf("%v: %v \n", name, err)
 			continue
 		}
-		actions, err := parseActions(actionData)
+		actions, err := parseActions(actionsData)
 		if err != nil || actions == nil {
 			log.Printf("%v: %v \n", name, err)
 			continue
 		}
 		rule := &Rule{
-			Name:      name,
-			Id:        id,
-			Event:     events,
-			Condition: conditions,
-			Action:    actions,
+			Name:       name,
+			Id:         id,
+			Conditions: conditions,
+			Actions:    actions,
 		}
 		rules = append(rules, rule)
 	}
@@ -90,48 +80,28 @@ func ParseRules(data interface{}) []*Rule {
 	return rules
 }
 
-func parseEvents(data []interface{}) ([]*Event, error) {
-	if data == nil || len(data) == 0 {
-		return nil, errors.New("without any event")
-	}
-	events := make([]*Event, len(data))
-	for i, e := range data {
-		ee := e.(map[interface{}]interface{})
-		if _, ok := ee["type"]; !ok {
-			return nil, errors.New("miss event type")
-		}
-		eThings := ee["thing"].([]interface{})
-		things := make([]string, len(eThings))
-		for i, item := range eThings {
-			things[i] = item.(string)
-		}
-		eData := ee["data"].(map[interface{}]interface{})
-		data := make(map[string]interface{}, len(eData))
-		for k, v := range eData {
-			data[k.(string)] = v
-		}
-		event := &Event{
-			Type:   ee["type"].(string),
-			Things: things,
-			Data:   data,
-		}
-		events[i] = event
-	}
+func parseEvent(eventData map[interface{}]interface{}) (*Event, error) {
 
-	return events, nil
+	if _, ok := eventData["type"]; !ok {
+		return nil, errors.New("miss event type")
+	}
+	event := &Event{
+		Type:  eventData["type"].(string),
+		Thing: eventData["thing"].(string),
+		Data:  eventData["data"].(map[interface{}]interface{}),
+	}
+	return event, nil
 }
 
 func parseConditions(data []interface{}) ([]*Condition, error) {
-	if data == nil || len(data) == 0 {
-		return nil, nil // conditions can be missed
-	}
+
 	conditions := make([]*Condition, len(data))
 	for i, c := range data {
 		cc := c.(map[interface{}]interface{})
 		if _, ok := cc["type"]; !ok {
 			return nil, errors.New("miss condition type")
 		}
-		cThings := cc["thing"].([]interface{})
+		cThings := cc["things"].([]interface{})
 		things := make([]string, len(cThings))
 		for i, item := range cThings {
 			things[i] = item.(string)
@@ -152,16 +122,13 @@ func parseConditions(data []interface{}) ([]*Condition, error) {
 
 func parseActions(data []interface{}) ([]*Action, error) {
 
-	if data == nil || len(data) == 0 {
-		return nil, errors.New("without any action")
-	}
 	actions := make([]*Action, len(data))
 	for i, a := range data {
 		aa := a.(map[interface{}]interface{})
 		if _, ok := aa["type"]; !ok {
 			return nil, errors.New("miss action type")
 		}
-		aThings := aa["thing"].([]interface{})
+		aThings := aa["things"].([]interface{})
 		things := make([]string, len(aThings))
 		for i, item := range aThings {
 			things[i] = item.(string)

@@ -6,6 +6,7 @@ import (
 	"time"
 )
 
+// every is a thing
 // four critical elements of a thing: name, state, property, service
 type Thing interface {
 	GetName() string     // name will be part of identification

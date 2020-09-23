@@ -16,14 +16,13 @@ type RuleEngine struct{}
 func init() {
 
 	// register plugin
-	var plugin core.Plugin
-	plugin = &RuleEngine{}
-	core.Root.PluginRegistry.Register(plugin)
-	log.Println("I have be initialized")
+	core.Root.PluginRegistry.Register(&RuleEngine{})
+	log.Println("Rule engine have been initialized")
 }
 
 func (r *RuleEngine) Setup(config interface{}) {
 
+	// load rules
 	dataPath := os.Getenv(utils.DATA_PATH)
 	rulePath := path.Join(dataPath, utils.CONFIG_DIR, utils.RULE_FILE)
 	data, err := ioutil.ReadFile(rulePath)
@@ -41,5 +40,7 @@ func (r *RuleEngine) Setup(config interface{}) {
 		return
 	}
 	rules := engine.ParseRules(rulesData)
-	engine.ActivateRules(rules)
+	engineConsumer := &engine.EngineConsumer{Rules: rules}
+	// listen event bus
+	core.Root.EventBus.Listen(core.ServiceCalled, engineConsumer)
 }

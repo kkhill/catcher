@@ -5,6 +5,6 @@ const (
 	DATA_DIR    = ".catcher"
 	CONFIG_DIR  = "config"
 	RULE_FILE   = "rule.yaml"
-	DRIVER_FILE = "driver.yaml"
-	PLUGIN_FILE = "plugin.yaml"
+	THING_FILE  = "things.yaml"
+	PLUGIN_FILE = "plugins.yaml"
 )

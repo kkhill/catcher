@@ -6,12 +6,16 @@ import (
 	"time"
 )
 
-type EventType int32
+type EventType string
 
+// define basic event types that core system will use
 const (
-	StateChanged    EventType = 0
-	PropertyChanged EventType = 1
-	ServiceCalled   EventType = 2
+	StateChanged    EventType = "StateChanged"
+	PropertyChanged EventType = "PropertyChanged"
+	ServiceCalled   EventType = "ServiceCalled"
+	PluginLoaded    EventType = "PluginLoaded"
+	SystemStarted   EventType = "SystemStarted"
+	SystemStopped   EventType = "SystemStopped"
 )
 
 type Event struct {
@@ -22,15 +26,16 @@ type Event struct {
 }
 
 type EventBus struct {
+	// listen the EventType, but fire with a Event
 	bus map[EventType]*list.List // EventType -> [ EventConsumer ]
 }
 
-func (eventBus *EventBus) Listen(event EventType, consumer *EventConsumer) {
+func (eventBus *EventBus) Listen(eventType EventType, consumer EventConsumer) {
 
-	if consumers, ok := eventBus.bus[event]; !ok {
+	if consumers, ok := eventBus.bus[eventType]; !ok {
 		consumers = list.New()
 		consumers.PushBack(consumer)
-		eventBus.bus[event] = consumers
+		eventBus.bus[eventType] = consumers
 	} else {
 		consumers.PushBack(consumer)
 	}
@@ -46,7 +51,7 @@ func (eventBus *EventBus) Fire(event *Event) {
 			if err != nil {
 				log.Printf("failed to execute consumer function \n")
 			}
-			log.Printf("execute consumer function %v \n", event.EventType)
+			log.Printf("executed consumer function %v \n", event.EventType)
 		}
 	}
 }

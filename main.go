@@ -21,15 +21,15 @@ func Start() {
 	os.Setenv(utils.DATA_PATH, dataPath)
 
 	// initialize driver
-	driverPath := path.Join(dataPath, utils.CONFIG_DIR, utils.DRIVER_FILE)
+	driverPath := path.Join(dataPath, utils.CONFIG_DIR, utils.THING_FILE)
 	data, err := ioutil.ReadFile(driverPath)
 	if err != nil {
-		log.Fatalln("Can not open driver.yaml")
+		log.Fatalln("Can not open things.yaml")
 	}
 	drivers := make(map[string]interface{})
 	err = yaml.Unmarshal(data, drivers)
 	if err != nil {
-		log.Fatalln("Syntax err in driver.yaml")
+		log.Fatalln("Syntax err in things.yaml")
 	}
 
 	log.Println("Start loading driver...")
@@ -39,12 +39,12 @@ func Start() {
 	pluginPath := path.Join(dataPath, utils.CONFIG_DIR, utils.PLUGIN_FILE)
 	data, err = ioutil.ReadFile(pluginPath)
 	if err != nil {
-		log.Fatalln("Can not open plugin.yaml")
+		log.Fatalln("Can not open plugins.yaml")
 	}
 	plugins := make(map[string]interface{})
 	err = yaml.Unmarshal(data, plugins)
 	if err != nil {
-		log.Fatalln("Syntax err in plugin.yaml")
+		log.Fatalln("Syntax err in plugins.yaml")
 	}
 	log.Println("Start loading plugins...")
 	core.Root.PluginRegistry.Load(plugins)
